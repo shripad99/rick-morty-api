@@ -1,24 +1,44 @@
-import logo from './logo.svg';
 import './App.css';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import CharacterList from './Components/CharacterList';
+import { Container, Grid } from '@mui/material';
+import axios from 'axios';
+import { useEffect, useState } from 'react';
+import CharacterFilter from './Components/CharacterFilter';
+import CharacterDetailsPage from './Components/CharacterDetailsPage';
 
 function App() {
+  const [characters, setCharacters] = useState([]);
+  const [useFilter, setUseFilter] = useState([{ name: '' ,status: '', gender: '' }]);
+
+  useEffect(() => {
+    const fetchCharacters = async () => {
+      try {
+        const response = await axios.get(`https://rickandmortyapi.com/api/character`);
+        setCharacters(response.data.results);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchCharacters();
+  }, []);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <BrowserRouter>
+      <Container>
+        <Grid>
+          <Grid item>
+            <CharacterFilter useFilter={useFilter} setUseFilter={setUseFilter} characters={characters} setCharacters={setCharacters}/>
+          </Grid>
+          <Grid item style={{display:'flex', alignItems:'center', justifyContent:'center'}}>
+              <Routes>
+                <Route path='/' element = {<CharacterList characters={characters} useFilter={useFilter} setUseFilter={setUseFilter} />} />
+                <Route path="/character/:id" element={<CharacterDetailsPage />} />
+              </Routes>
+          </Grid>
+        </Grid>
+      </Container>
+    </BrowserRouter>
   );
 }
 
